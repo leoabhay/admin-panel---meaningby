@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Management</title>
+    <script src="https://cdn.tiny.cloud/1/5tx9fzbcgybhvglruhtjmcviivqj32397ddz5vnvd8dco9tz/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            color: black;
+            padding: 0;
+            text-align: center;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            flex: 1;
+        }
+        .top-bar {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        .top-bar button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        .blog-form {
+            margin-bottom: 20px;
+        }
+        .blog-form input, .blog-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .blog-form button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        .blog-list table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .blog-list th, .blog-list td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .blog-list th {
+            background-color: #f4f4f4;
+        }
+        .blog-list button {
+            padding: 5px 10px;
+            margin: 0 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .blog-list button:nth-child(1) {
+            background-color: #ffc107;
+            color: #fff;
+        }
+        .blog-list button:nth-child(2) {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<%- include('./navbar', { isLoggedIn: isLoggedIn }) %>
+
+<header>
+    <h1>Blog Management</h1>
+    <hr>
+</header>
+
+<div class="container">
+    <div class="top-bar">
+        <button onclick="toggleCreateForm()">Create Blog</button>
+    </div>
+
+    <form class="blog-form" id="createBlogForm" style="display:none;" enctype="multipart/form-data" method="POST">
+        <h2 id="formTitle">Create Blog</h2>
+        <input type="hidden" id="blogIdInput" name="blogId">
+        <input type="text" id="titleInput" name="title" placeholder="Enter title">
+        <input type="text" id="authorInput" name="author" placeholder="Enter author">
+        <input type="file" id="imageInput" name="image" accept="image/*">
+        <textarea id="descriptionInput" name="description" placeholder="Enter description"></textarea>
+        <button type="button" onclick="saveBlog()">Save Blog</button>
+    </form>
+
+    <div class="blog-list" id="blogList">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Image</th>
+                    <th>Description</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- blogs will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<footer>
+    <%- include('./footer') %>
+</footer>
+
+<script>
+    window.onload = function () {
+        tinymce.init({
+            selector: '#descriptionInput',
+            plugins: 'advlist autolink lists link charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime table wordcount',
+            toolbar: 'undo redo | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent | removeformat'
+        });
+
+        fetchBlogs();
+    };
+
+    function toggleCreateForm() {
+        const form = document.getElementById('createBlogForm');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        document.getElementById('formTitle').innerText = 'Create Blog';
+        document.getElementById('blogIdInput').value = '';
+        document.getElementById('titleInput').value = '';
+        document.getElementById('authorInput').value = '';
+        document.getElementById('imageInput').value = '';
+        tinymce.get('descriptionInput').setContent('');
+    }
+
+    async function fetchBlogs() {
+        try {
+            const response = await fetch('/api/blog/getAll');
+            const data = await response.json();
+            const blogList = document.querySelector('.blog-list tbody');
+            blogList.innerHTML = '';
+
+            data.blogs.forEach(blog => {
+                const blogRow = document.createElement('tr');
+                blogRow.innerHTML = `
+                    <td>${blog.title}</td>
+                    <td>${blog.author}</td>
+                    <td><img src="/${blog.image}" alt="Blog Image" width="100"></td>
+                    <td>${blog.description}</td>
+                    <td>${new Date(blog.createdAt).toLocaleDateString()}</td>
+                    <td>
+                        <button onclick="editBlog('${blog._id}')">Edit</button>
+                        <button onclick="deleteBlog('${blog._id}')">Delete</button>
+                    </td>
+                `;
+                blogList.appendChild(blogRow);
+            });
+        } catch (error) {
+            console.error("Error fetching blogs:", error);
+        }
+    }
+
+    async function saveBlog() {
+    const blogId = document.getElementById('blogIdInput').value;
+    const title = document.getElementById('titleInput').value;
+    const author = document.getElementById('authorInput').value;
+    const description = tinymce.get('descriptionInput').getContent();
+    const imageInput = document.getElementById('imageInput');
+    const image = imageInput.files.length > 0 ? imageInput.files[0] : null;
+
+    if (!title || !author || !description) {
+        alert('All fields are required!');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('author', author);
+    formData.append('description', description);
+    if (image) {
+        formData.append('image', image);
+    }
+
+    const url = blogId ? `/api/blog/update/${blogId}` : '/api/blog/create';
+    const method = blogId ? 'PUT' : 'POST';
+
+    try {
+        const response = await fetch(url, {
+            method: method,
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert(data.message);
+            fetchBlogs();
+            toggleCreateForm();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error saving blog:', error);
+        alert('Failed to save blog.');
+    }
+}
+
+    async function deleteBlog(blogId) {
+        try {
+            const response = await fetch(`/api/blog/delete/${blogId}`, { method: 'DELETE' });
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.message);
+                fetchBlogs();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error deleting blog:', error);
+        }
+    }
+
+    async function editBlog(blogId) {
+        try {
+            const response = await fetch(`/api/blog/get/${blogId}`);
+            const data = await response.json();
+
+            if (data) {
+                document.getElementById('blogIdInput').value = data._id;
+                document.getElementById('titleInput').value = data.title;
+                document.getElementById('authorInput').value = data.author;
+                tinymce.get('descriptionInput').setContent(data.description);
+                document.getElementById('formTitle').innerText = 'Edit Blog';
+                document.getElementById('createBlogForm').style.display = 'block';
+            } else {
+                alert('Blog not found');
+            }
+        } catch (error) {
+            console.error('Error editing blog:', error);
+        }
+    }
+</script>
+
+</body>
+</html>

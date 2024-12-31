@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature Management</title>
+    <script src="https://cdn.tiny.cloud/1/5tx9fzbcgybhvglruhtjmcviivqj32397ddz5vnvd8dco9tz/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa; /* Light gray background */
+            color: #343a40; /* Dark gray text */
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #343a40; /* Dark gray background */
+            padding: 20px;
+            color: #fff; /* White text */
+            display: flex;
+            justify-content: space-between; /* Ensure logo and title are spaced out */
+            align-items: center; /* Vertically center both elements */
+        }
+        header .logo {
+            position: relative;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            text-align: center; /* Center the title */
+            flex-grow: 1;
+        }
+        .container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+        .top-bar button {
+            background-color: #007bff; /* Blue background */
+            color: #fff; /* White text */
+            border: none;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .top-bar button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+        .feature-form, .feature-list {
+            background-color: #fff; /* White background */
+            padding: 20px;
+            margin: 10px;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+        .feature-form h2 {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff; /* Blue background */
+            color: #fff; /* White text */
+            border: none;
+            padding: 10px;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+        .feature-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            justify-content: start; /* Align grid items to the left */
+        }
+        .feature-item {
+            padding: 15px;
+            background-color: #f8f9fa; /* Light gray background */
+            color: #343a40; /* Dark gray text */
+            border-radius: 5px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+        }
+        .feature-item span {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .feature-item span.description {
+            display: inline; /* Ensure description is on the same line */
+        }
+        .feature-item button {
+            background-color: #dc3545; /* Red background */
+            color: #fff; /* White text */
+            border-radius: 3px;
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
+        .feature-item button:hover {
+            background-color: #bd2130; /* Darker red on hover */
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <!-- Logo that redirects to the dashboard -->
+    <a href="/dashboard" class="logo">
+        <img src="/profile.jpg" alt="Logo" style="height: 40px;"> <!-- Replace with your logo image -->
+    </a>
+    <h1>Feature Management</h1>
+</header>
+
+<div class="container">
+    <!-- Top Bar with Create feature Button -->
+    <div class="top-bar">
+        <button onclick="toggleCreateForm()">Create Feature</button>
+    </div>
+
+    <!-- Form to Create or Update a feature -->
+    <div class="feature-form" id="createfeatureForm" style="display:none;">
+        <h2 id="formTitle">Create Feature</h2>
+        <input type="hidden" id="featureIdInput">
+        <input type="text" id="titleInput" placeholder="Enter title">
+        <textarea id="descriptionInput" placeholder="Enter description"></textarea>
+        <button onclick="savefeature()">Save Feature</button>
+    </div>
+
+    <!-- feature List -->
+    <div class="feature-list" id="featureList">
+        <!-- features will be dynamically inserted here -->
+    </div>
+</div>
+
+<script>
+    window.onload = function () {
+        // Initialize TinyMCE on the descriptionInput textarea
+        tinymce.init({
+            selector: '#descriptionInput',
+            plugins: 'advlist autolink lists link charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime table wordcount',
+            toolbar: 'undo redo | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent | removeformat'
+        });
+
+        fetchfeatures();
+    };
+
+    // Toggle visibility of the create feature form
+    function toggleCreateForm() {
+        const form = document.getElementById('createfeatureForm');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        document.getElementById('formTitle').innerText = 'Create feature';
+        document.getElementById('featureIdInput').value = '';
+        document.getElementById('titleInput').value = '';
+        tinymce.get('descriptionInput').setContent('');
+    }
+
+    // Fetch all features
+    async function fetchfeatures() {
+        try {
+            const response = await fetch('/api/feature/getAll');
+            const data = await response.json();
+            if (data.features) {
+                const featureList = document.getElementById('featureList');
+                featureList.innerHTML = ''; // Clear current list
+
+                data.features.forEach(feature => {
+                    const featureItem = document.createElement('div');
+                    featureItem.classList.add('feature-item');
+                    featureItem.innerHTML = `
+                        <span><strong>Title:</strong> ${feature.title}</span>
+                        <span class="description"><strong>Description:</strong> ${feature.description}</span>
+                        <div>
+                            <button onclick="editfeature('${feature._id}')">Edit</button>
+                            <button onclick="deletefeature('${feature._id}')">Delete</button>
+                        </div>
+                    `;
+                    featureList.appendChild(featureItem);
+                });
+            } else {
+                console.error("No features found");
+            }
+        } catch (err) {
+            console.error("Error fetching features:", err);
+        }
+    }
+
+    // Save a new or existing feature
+    async function savefeature() {
+        const featureId = document.getElementById('featureIdInput').value;
+        const title = document.getElementById('titleInput').value;
+        const description = tinymce.get('descriptionInput').getContent();
+
+        if (!title || !description) {
+            alert('Both fields are required!');
+            return;
+        }
+
+        const url = featureId ? `/api/feature/update/${featureId}` : '/api/feature/create';
+        const method = featureId ? 'PUT' : 'POST';
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, description })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.message);
+                fetchfeatures();  // Refresh the feature list
+                toggleCreateForm(); // Hide the form after saving
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error saving feature:', error);
+            alert('Failed to save feature.');
+        }
+    }
+
+    // Delete a feature
+    async function deletefeature(featureId) {
+        try {
+            const response = await fetch(`/api/feature/delete/${featureId}`, { method: 'DELETE' });
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.message);
+                fetchfeatures();  // Refresh the list after deletion
+            } else {
+                console.error('Error response:', data);
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error deleting feature:', error);
+            alert('Failed to delete feature.');
+        }
+    }
+
+    // Edit a feature (populate the form)
+    async function editfeature(featureId) {
+        try {
+            const response = await fetch(`/api/feature/get/${featureId}`);
+            const data = await response.json();
+
+            if (response.ok && data.feature) {
+                const feature = data.feature;
+                document.getElementById('featureIdInput').value = feature._id;
+                document.getElementById('titleInput').value = feature.title;
+                tinymce.get('descriptionInput').setContent(feature.description);
+                document.getElementById('formTitle').innerText = 'Edit feature';
+                document.getElementById('createfeatureForm').style.display = 'block';
+            } else {
+                alert('feature not found');
+            }
+        } catch (error) {
+            console.error('Error editing feature:', error);
+            alert('Failed to edit feature.');
+        }
+    }
+</script>
+
+<%- include('./footer') %>
+
+</body>
+</html>

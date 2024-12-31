@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Management</title>
+    <script src="https://cdn.tiny.cloud/1/5tx9fzbcgybhvglruhtjmcviivqj32397ddz5vnvd8dco9tz/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            /* background-color: ; */
+            color: black;
+            padding: 0;
+            text-align: center;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            flex: 1;
+        }
+        .top-bar {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        .top-bar button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        .word-form {
+            margin-bottom: 20px;
+        }
+        .word-form input, .word-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .word-form button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        .word-list table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .word-list th, .word-list td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .word-list th {
+            background-color: #f4f4f4;
+        }
+        .word-list button {
+            padding: 5px 10px;
+            margin: 0 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .word-list button:nth-child(1) {
+            background-color: #ffc107;
+            color: #fff;
+        }
+        .word-list button:nth-child(2) {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<%- include('./navbar', { isLoggedIn: isLoggedIn }) %>
+
+<header>
+    <h1>Word Management</h1> <hr>
+</header>
+
+<div class="container">
+    <!-- Top Bar with Create Word Button -->
+    <div class="top-bar">
+        <button onclick="toggleCreateForm()">Create Word</button>
+    </div>
+
+    <!-- Form to Create or Update a Word -->
+    <div class="word-form" id="createWordForm" style="display:none;">
+        <h2 id="formTitle">Create Word</h2>
+        <input type="hidden" id="wordIdInput">
+        <input type="text" id="wordInput" placeholder="Enter word">
+        <textarea id="definitionInput" placeholder="Enter definition"></textarea>
+        <textarea id="synonymsInput" placeholder="Enter synonyms (comma separated)"></textarea>
+        <textarea id="antonymsInput" placeholder="Enter antonyms (comma separated)"></textarea>
+        <textarea id="exampleInput" placeholder="Enter example"></textarea>
+        <button onclick="saveWord()">Save Word</button>
+    </div>
+
+    <!-- Word List -->
+    <div class="word-list" id="wordList">
+        <table>
+            <thead>
+                <tr>
+                    <th>Word</th>
+                    <th>Definition</th>
+                    <th>Synonyms</th>
+                    <th>Antonyms</th>
+                    <th>Example</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Words will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<footer>
+    <%- include('./footer') %>
+</footer>
+
+<script>
+    window.onload = function () {
+        // Initialize TinyMCE on the definitionInput textarea
+        tinymce.init({
+            selector: '#definitionInput',
+            plugins: 'advlist autolink lists link charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime table wordcount',
+            toolbar: 'undo redo | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent | removeformat'
+        });
+
+        fetchWords();
+    };
+
+    // Toggle visibility of the create word form
+    function toggleCreateForm() {
+        const form = document.getElementById('createWordForm');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        document.getElementById('formTitle').innerText = 'Create Word';
+        document.getElementById('wordIdInput').value = '';
+        document.getElementById('wordInput').value = '';
+        tinymce.get('definitionInput').setContent('');
+        document.getElementById('synonymsInput').value = '';
+        document.getElementById('antonymsInput').value = '';
+        document.getElementById('exampleInput').value = '';
+    }
+
+    // Fetch all words
+    async function fetchWords() {
+        try {
+            const response = await fetch('/api/word/getAll');
+            const data = await response.json();
+            if (data.words) {
+                const wordList = document.querySelector('.word-list tbody');
+                wordList.innerHTML = ''; // Clear current list
+
+                data.words.forEach(word => {
+                    const wordRow = document.createElement('tr');
+                    wordRow.innerHTML = `
+                        <td>${word.word}</td>
+                        <td>${word.definition}</td>
+                        <td>${word.synonyms}</td>
+                        <td>${word.antonyms}</td>
+                        <td>${word.example}</td>
+                        <td>
+                            <button onclick="editWord('${word._id}')">Edit</button>
+                            <button onclick="deleteWord('${word._id}')">Delete</button>
+                        </td>
+                    `;
+                    wordList.appendChild(wordRow);
+                });
+            } else {
+                console.error("No words found");
+            }
+        } catch (err) {
+            console.error("Error fetching words:", err);
+        }
+    }
+
+    // Save a new or existing word
+    async function saveWord() {
+        const wordId = document.getElementById('wordIdInput').value;
+        const word = document.getElementById('wordInput').value;
+        const definition = tinymce.get('definitionInput').getContent();
+        const synonyms = document.getElementById('synonymsInput').value;
+        const antonyms = document.getElementById('antonymsInput').value;
+        const example = document.getElementById('exampleInput').value;
+
+        if (!word || !definition || !example) {
+            alert('Word, definition, and example fields are required!');
+            return;
+        }
+
+        const url = wordId ? `/api/word/update/${wordId}` : '/api/word/create';
+        const method = wordId ? 'PUT' : 'POST';
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ word, definition, synonyms, antonyms, example })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.message);
+                fetchWords();  // Refresh the word list
+                toggleCreateForm(); // Hide the form after saving
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error saving word:', error);
+            alert('Failed to save word.');
+        }
+    }
+
+    // Delete a word
+    async function deleteWord(wordId) {
+        try {
+            const response = await fetch(`/api/word/delete/${wordId}`, { method: 'DELETE' });
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.message);
+                fetchWords();  // Refresh the list after deletion
+            } else {
+                console.error('Error response:', data);
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error deleting word:', error);
+            alert('Failed to delete word.');
+        }
+    }
+
+    // Edit a word (populate the form)
+    async function editWord(wordId) {
+        if (!wordId) {
+            alert("Invalid word ID");
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/word/get/${wordId}`);
+
+            const data = await response.json();
+            console.log("Fetched word data:", data);
+
+            if (response.ok && data) {
+                const word = data;
+
+                document.getElementById('wordIdInput').value = word._id;
+                document.getElementById('wordInput').value = word.word || ''; // Ensure fallback
+
+                // Use empty string as fallback for undefined or null values
+                tinymce.get('definitionInput').setContent(word.definition || '');
+                document.getElementById('synonymsInput').value = word.synonyms || '';
+                document.getElementById('antonymsInput').value = word.antonyms || '';
+                document.getElementById('exampleInput').value = word.example || '';
+
+                document.getElementById('formTitle').innerText = 'Edit Word';
+                document.getElementById('createWordForm').style.display = 'block';
+            } else {
+                alert('Word not found');
+            }
+        } catch (error) {
+            console.error('Error editing word:', error);
+            alert('Failed to edit word.');
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fff; /* white background */
+            color: #000; /* black text */
+            display: flex;
+            flex-direction: column;
+            height: 100vh; /* full viewport height */
+            overflow: hidden; /* Pprevent scrolling */
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex: 1; /* ensures the main content and sidebar grow to take available space */
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #fff; /* white background */
+            border-right: 1px solid #ccc; /* light grey border */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* align items to the start */
+            flex-shrink: 0; /* prevent shrinking */
+        }
+
+        .sidebar .profile {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .sidebar .profile img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .sidebar .profile h2 {
+            font-size: 18px;
+            margin-bottom: 5px;
+            color: #000;
+        }
+
+        .sidebar .profile a {
+            text-decoration: none;
+            color: #000;
+            font-size: 14px;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            flex-grow: 1; /* ensures the menu takes the remaining space */
+        }
+
+        .sidebar ul li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar ul li a {
+            text-decoration: none;
+            color: #000;
+            display: block;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f5f5f5; /* light grey background */
+        }
+
+        .sidebar ul li a:hover, .sidebar ul li a.active {
+            background-color: #ddd; /* darker grey on hover */
+            color: #000; /* black text on hover */
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            text-align: center;
+            overflow-y: auto; /* vertical scrolling if needed */
+        }
+
+        .main-content h1 {
+            font-size: 36px;
+            margin-top: 50px;
+            color: #000;
+        }
+
+        .main-content p {
+            font-size: 18px;
+            margin-top: 20px;
+            color: #000;
+        }
+
+        .footer {
+            width: 100%;
+            background-color: #000;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            flex-shrink: 0; /* prevent shrinking */
+            position: absolute;
+            bottom: 0;
+        }
+    </style>
+</head>
+<body>
+
+<%- include('navbar') %>
+
+<div class="content-wrapper">
+    <div class="sidebar">
+        <div class="profile">
+            <!-- user profile section -->
+            <img src="<%= userProfileImage || '/profile.jpg' %>" alt="Profile Picture">
+            <h2><%= userName %></h2>
+            <% if (!isLoggedIn) { %>
+                <!-- show "Sign In" link if not logged in -->
+                <a href="/login">Sign In</a>
+            <% } else { %>
+                <!-- show "Profile" link if logged in -->
+                <a href="/profile">Profile</a>
+            <% } %>
+        </div>
+        <!-- sidebar Menu -->
+        <ul>
+            <li><a href="#" class="active">Dashboard</a></li>
+            <li><a href="/word">Word</a></li>
+            <li><a href="/blog">Blog</a></li>
+            <li><a href="/feature">Feature</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <h1>Welcome to Meaning By</h1>
+        <% if (isLoggedIn) { %>
+            <p>Your personalized dashboard is ready to use!</p>
+        <% } else { %>
+            <p>Please log in to access your dashboard.</p>
+        <% } %>
+    </div>
+</div>
+
+<%- include('./footer') %>
+
+</body>
+</html>
