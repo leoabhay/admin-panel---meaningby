@@ -34,13 +34,14 @@ const getWords = async (req, res) => {
     try {
         const words = await Word.find();
         res.status(200).json({ words });
+
     } catch (error) {
         console.error("Error fetching words:", error);
         res.status(500).json({ message: "Error getting words", error: error.message });
     }
 };
 
-// get word by ID controller
+// get word by id controller
 const getWordById = async (req, res) => {
     try {
         const { wordId } = req.params;  // ensure `wordId` matches the route definition
@@ -49,12 +50,14 @@ const getWordById = async (req, res) => {
             return res.status(400).json({ message: "Word ID is required" });
         }
 
+        // check if word exists
         const word = await Word.findById(wordId);
         if (!word) {
             return res.status(404).json({ message: "Word not found" });
         }
 
         res.status(200).json(word);
+
     } catch (error) {
         console.error("Error getting word:", error);
         res.status(500).json({ message: "Error getting word", error: error.message });
@@ -78,6 +81,7 @@ const updateWord = async (req, res) => {
             return res.status(400).json({ message: "All fields are required" });
         }
 
+        // update word
         existingWord.word = word;
         existingWord.definition = definition;
         existingWord.synonyms = synonyms;
@@ -113,8 +117,10 @@ const deleteWord = async (req, res) => {
             return res.status(404).json({ message: "Word not found" });
         }
 
-        await existingWord.deleteOne();      // this will delete the document
+        await existingWord.deleteOne();      // this will delete the word from the database
+
         res.status(200).json({ message: "Word deleted successfully" });
+        
     } catch (error) {
         console.error("Error deleting word:", error);
         res.status(500).json({ message: "Error deleting word", error: error.message });

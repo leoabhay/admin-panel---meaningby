@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Word Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.tiny.cloud/1/5tx9fzbcgybhvglruhtjmcviivqj32397ddz5vnvd8dco9tz/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     <style>
         body {
@@ -140,9 +141,7 @@
     </div>
 </div>
 
-<footer>
-    <%- include('./footer') %>
-</footer>
+<%- include('./footer') %>
 
 <script>
     window.onload = function () {
@@ -187,8 +186,15 @@
                         <td>${word.antonyms}</td>
                         <td>${word.example}</td>
                         <td>
-                            <button onclick="editWord('${word._id}')">Edit</button>
-                            <button onclick="deleteWord('${word._id}')">Delete</button>
+                            <!-- Using Flaticon icon for edit button -->
+                            <button onclick="editWord('${word._id}')">
+                                <i class="fas fa-edit"></i>   
+                            </button>
+
+                            <!-- Using Flaticon icon for delete button -->
+                            <button onclick="deleteWord('${word._id}')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
                         </td>
                     `;
                     wordList.appendChild(wordRow);
@@ -268,7 +274,7 @@
 
         try {
             const response = await fetch(`/api/word/get/${wordId}`);
-
+            
             const data = await response.json();
             console.log("Fetched word data:", data);
 

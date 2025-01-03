@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { createBlog, getBlogs, getBlogById, updateBlog, deleteBlog, upload } = require('../controllers/blogController');
+const { createBlog, getBlogs, getBlogById, updateBlog, deleteBlog} = require('../controllers/blogController');
 
 // create blog route
-router.post('/create', upload.single('image'), createBlog);
+router.post('/create', createBlog);
 
 // get all blogs route
 router.get('/getAll', getBlogs);
@@ -12,7 +12,7 @@ router.get('/getAll', getBlogs);
 router.get('/get/:blogId', getBlogById);
 
 // update blog route
-router.put('/update/:blogId', upload.single('image'), updateBlog);
+router.put('/update/:blogId', updateBlog);
 
 // delete blog route
 router.delete('/delete/:blogId', deleteBlog);

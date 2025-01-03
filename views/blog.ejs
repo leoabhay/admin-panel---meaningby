@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.tiny.cloud/1/5tx9fzbcgybhvglruhtjmcviivqj32397ddz5vnvd8dco9tz/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     <style>
         body {
@@ -98,33 +99,35 @@
 <%- include('./navbar', { isLoggedIn: isLoggedIn }) %>
 
 <header>
-    <h1>Blog Management</h1>
-    <hr>
+    <h1>Blog Management</h1> <hr>
 </header>
 
 <div class="container">
+    <!-- top bar with create blog button -->
     <div class="top-bar">
         <button onclick="toggleCreateForm()">Create Blog</button>
     </div>
 
-    <form class="blog-form" id="createBlogForm" style="display:none;" enctype="multipart/form-data" method="POST">
+    <!-- form to create or update a blog -->
+    <div class="blog-form" id="createBlogForm" style="display:none;">
         <h2 id="formTitle">Create Blog</h2>
-        <input type="hidden" id="blogIdInput" name="blogId">
-        <input type="text" id="titleInput" name="title" placeholder="Enter title">
-        <input type="text" id="authorInput" name="author" placeholder="Enter author">
-        <input type="file" id="imageInput" name="image" accept="image/*">
-        <textarea id="descriptionInput" name="description" placeholder="Enter description"></textarea>
-        <button type="button" onclick="saveBlog()">Save Blog</button>
-    </form>
+        <input type="hidden" id="blogIdInput">
+        <input type="text" id="titleInput" placeholder="Enter title">
+        <textarea id="descriptionInput" placeholder="Enter description"></textarea>
+        <textarea id="fullDescriptionInput" placeholder="Enter full description"></textarea>
+        <input type="text" id="authorInput" placeholder="Enter author">
+        <button onclick="saveBlog()">Save Blog</button>
+    </div>
 
+    <!-- blog List -->
     <div class="blog-list" id="blogList">
         <table>
             <thead>
                 <tr>
                     <th>Title</th>
-                    <th>Author</th>
-                    <th>Image</th>
                     <th>Description</th>
+                    <th>Full Description</th>
+                    <th>Author</th>
                     <th>Created At</th>
                     <th>Actions</th>
                 </tr>
@@ -136,14 +139,13 @@
     </div>
 </div>
 
-<footer>
-    <%- include('./footer') %>
-</footer>
+<%- include('./footer') %>
 
 <script>
     window.onload = function () {
+        // initialize TinyMCE on the fullDescriptionInput textarea
         tinymce.init({
-            selector: '#descriptionInput',
+            selector: '#fullDescriptionInput',
             plugins: 'advlist autolink lists link charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime table wordcount',
             toolbar: 'undo redo | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent | removeformat'
         });
@@ -151,92 +153,93 @@
         fetchBlogs();
     };
 
+    // toggle visibility of the create blog form
     function toggleCreateForm() {
         const form = document.getElementById('createBlogForm');
         form.style.display = form.style.display === 'none' ? 'block' : 'none';
         document.getElementById('formTitle').innerText = 'Create Blog';
         document.getElementById('blogIdInput').value = '';
         document.getElementById('titleInput').value = '';
+        document.getElementById('descriptionInput').value = '';
+        tinymce.get('fullDescriptionInput').setContent('');
         document.getElementById('authorInput').value = '';
-        document.getElementById('imageInput').value = '';
-        tinymce.get('descriptionInput').setContent('');
     }
 
+    // fetch all blogs
     async function fetchBlogs() {
         try {
             const response = await fetch('/api/blog/getAll');
             const data = await response.json();
-            const blogList = document.querySelector('.blog-list tbody');
-            blogList.innerHTML = '';
+            if (data.blogs) {
+                const blogList = document.querySelector('.blog-list tbody');
+                blogList.innerHTML = ''; // Clear current list
 
-            data.blogs.forEach(blog => {
-                const blogRow = document.createElement('tr');
-                blogRow.innerHTML = `
-                    <td>${blog.title}</td>
-                    <td>${blog.author}</td>
-                    <td><img src="/${blog.image}" alt="Blog Image" width="100"></td>
-                    <td>${blog.description}</td>
-                    <td>${new Date(blog.createdAt).toLocaleDateString()}</td>
-                    <td>
-                        <button onclick="editBlog('${blog._id}')">Edit</button>
-                        <button onclick="deleteBlog('${blog._id}')">Delete</button>
-                    </td>
-                `;
-                blogList.appendChild(blogRow);
-            });
-        } catch (error) {
-            console.error("Error fetching blogs:", error);
-        }
-    }
-
-    async function saveBlog() {
-    const blogId = document.getElementById('blogIdInput').value;
-    const title = document.getElementById('titleInput').value;
-    const author = document.getElementById('authorInput').value;
-    const description = tinymce.get('descriptionInput').getContent();
-    const imageInput = document.getElementById('imageInput');
-    const image = imageInput.files.length > 0 ? imageInput.files[0] : null;
-
-    if (!title || !author || !description) {
-        alert('All fields are required!');
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('author', author);
-    formData.append('description', description);
-    if (image) {
-        formData.append('image', image);
-    }
-
-    const url = blogId ? `/api/blog/update/${blogId}` : '/api/blog/create';
-    const method = blogId ? 'PUT' : 'POST';
-
-    try {
-        const response = await fetch(url, {
-            method: method,
-            body: formData,
-            headers: {
-                'Accept': 'application/json'
+                data.blogs.forEach(blog => {
+                    const blogRow = document.createElement('tr');
+                    blogRow.innerHTML = `
+                        <td>${blog.title}</td>
+                        <td>${blog.description}</td>
+                        <td>${blog.full_description}</td>
+                        <td>${blog.author}</td>
+                        <td>${new Date(blog.createdAt).toLocaleString()}</td>
+                        <td>
+                            <button onclick="editBlog('${blog._id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteBlog('${blog._id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    blogList.appendChild(blogRow);
+                });
+            } else {
+                console.error("No blogs found");
             }
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            alert(data.message);
-            fetchBlogs();
-            toggleCreateForm();
-        } else {
-            alert('Error: ' + data.message);
+        } catch (err) {
+            console.error("Error fetching blogs:", err);
         }
-    } catch (error) {
-        console.error('Error saving blog:', error);
-        alert('Failed to save blog.');
     }
-}
 
+    // Save a new or existing blog
+    async function saveBlog() {
+        const blogId = document.getElementById('blogIdInput').value;
+        const title = document.getElementById('titleInput').value;
+        const description = document.getElementById('descriptionInput').value;
+        const fullDescription = tinymce.get('fullDescriptionInput').getContent();
+        const author = document.getElementById('authorInput').value;
+
+        if (!title || !description || !fullDescription || !author) {
+            alert('All fields are required!');
+            return;
+        }
+
+        const url = blogId ? `/api/blog/update/${blogId}` : '/api/blog/create';
+        const method = blogId ? 'PUT' : 'POST';
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, description, full_description: fullDescription, author })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.message);
+                fetchBlogs();  // Refresh the blog list
+                toggleCreateForm(); // Hide the form after saving
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error saving blog:', error);
+            alert('Failed to save blog.');
+        }
+    }
+
+    // Delete a blog
     async function deleteBlog(blogId) {
         try {
             const response = await fetch(`/api/blog/delete/${blogId}`, { method: 'DELETE' });
@@ -244,25 +247,39 @@
 
             if (response.ok) {
                 alert(data.message);
-                fetchBlogs();
+                fetchBlogs();  // Refresh the list after deletion
             } else {
+                console.error('Error response:', data);
                 alert('Error: ' + data.message);
             }
         } catch (error) {
             console.error('Error deleting blog:', error);
+            alert('Failed to delete blog.');
         }
     }
 
+    // Edit a blog (populate the form)
     async function editBlog(blogId) {
+        if (!blogId) {
+            alert('Invalid blog ID');
+            return;
+        }
+
         try {
             const response = await fetch(`/api/blog/get/${blogId}`);
-            const data = await response.json();
 
-            if (data) {
-                document.getElementById('blogIdInput').value = data._id;
-                document.getElementById('titleInput').value = data.title;
-                document.getElementById('authorInput').value = data.author;
-                tinymce.get('descriptionInput').setContent(data.description);
+            const data = await response.json();
+            console.log("Fetched blog data:", data);
+
+            if (response.ok && data) {
+                const blog = data;
+
+                document.getElementById('blogIdInput').value = blog._id;
+                document.getElementById('titleInput').value = blog.title || '';
+                document.getElementById('descriptionInput').value = blog.description || '';
+                tinymce.get('fullDescriptionInput').setContent(blog.full_description || '');
+                document.getElementById('authorInput').value = blog.author || '';
+                
                 document.getElementById('formTitle').innerText = 'Edit Blog';
                 document.getElementById('createBlogForm').style.display = 'block';
             } else {
@@ -270,6 +287,7 @@
             }
         } catch (error) {
             console.error('Error editing blog:', error);
+            alert('Failed to edit blog.');
         }
     }
 </script>

@@ -10,21 +10,21 @@ const createFeature = async (req, res) => {
             return res.status(400).json({ message: "All fields are required" });
         }
 
-        // create new feature
-        const newFeature = new Feature({
-            title,
-            description
-        });
+        // create feature
+        const newFeature = new Feature({ title, description });
         await newFeature.save();
 
         res.status(201).json({
             message: "Feature created successfully",
-            feature: { id: newFeature._id, title: newFeature.title, description: newFeature.description }
+            feature: { id: newFeature._id, 
+                    feature: newFeature.title, 
+                    description: newFeature.description }
         });
 
     } catch (error) {
-        console.error("Error creating blog:", error);
-        res.status(500).json({ message: "Error creating blog", error: error.message });
+
+        console.error("Error creating feature:", error);
+        res.status(500).json({ message: "Error creating feature", error: error.message });
     }
 };
 
@@ -35,7 +35,7 @@ const getFeatures = async (req, res) => {
         res.status(200).json({ features });
 
     } catch (error) {
-        console.error("Error getting features:", error);
+        console.error("Error fetching features:", error);
         res.status(500).json({ message: "Error getting features", error: error.message });
     }
 };
@@ -43,18 +43,22 @@ const getFeatures = async (req, res) => {
 // get feature by id controller
 const getFeatureById = async (req, res) => {
     try {
-        const { FeatureId } = req.params;
+        const { featureId } = req.params;  // ensure `featureId` matches the route definition
 
-        // check if blog exists
-        const blog = await Blog.findById(FeatureId);
-        if (!blog) {
+        if (!featureId) {
+            return res.status(400).json({ message: "Feature ID is required" });
+        }
+
+        // check if feature exists
+        const feature = await Feature.findById(featureId);
+        if (!feature) {
             return res.status(404).json({ message: "Feature not found" });
         }
 
-        res.status(200).json({ feature});
+        res.status(200).json(feature);
 
     } catch (error) {
-        console.error("Error getting feature:", error);
+        console.error("Error fetching feature:", error);
         res.status(500).json({ message: "Error getting feature", error: error.message });
     }
 };
@@ -62,43 +66,50 @@ const getFeatureById = async (req, res) => {
 // update feature controller
 const updateFeature = async (req, res) => {
     try {
-        const { FeatureId } = req.params;
+        const { featureId } = req.params;
         const { title, description } = req.body;
 
-        // check if blog exists
-        const feature = await Feature.findById(blogId);
-        if (!feature) {
+        // validate fields
+        if (!title || !description) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        // check if feature exists
+        const existingFeature = await Feature.findById(featureId);
+        if (!existingFeature) {
             return res.status(404).json({ message: "Feature not found" });
         }
 
-        // update blog
-        feature.title = title;
-        feature.description = description;
-        await feature.save();
+        // update feature
+        existingFeature.title = title;
+        existingFeature.description = description;
+        await existingFeature.save();
 
         res.status(200).json({
             message: "Feature updated successfully",
-            feature: { title: feature.title, description: feature.description }
+            feature: { id: existingFeature._id, 
+                    title: existingFeature.title, 
+                    description: existingFeature.description }
         });
 
     } catch (error) {
-        console.error("Error updating blog:", error);
-        res.status(500).json({ message: "Error updating blog", error: error.message });
+        console.error("Error updating feature:", error);
+        res.status(500).json({ message: "Error updating feature", error: error.message });
     }
 };
 
 // delete feature controller
 const deleteFeature = async (req, res) => {
     try {
-        const { FeatureId } = req.params;
+        const { featureId } = req.params;
 
         // check if feature exists
-        const feature = await Feature.findById(FeatureId);
-        if (!feature) {
+        const existingFeature = await Feature.findById(featureId);
+        if (!existingFeature) {
             return res.status(404).json({ message: "Feature not found" });
         }
 
-        await Blog.deleteOne();
+        await existingFeature.deleteOne();
 
         res.status(200).json({ message: "Feature deleted successfully" });
 

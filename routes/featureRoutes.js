@@ -9,12 +9,12 @@ router.post('/create', createFeature);
 router.get('/getAll', getFeatures);
 
 // get feature by id route
-router.get('/get:featureId', getFeatureById);
+router.get('/get/:featureId', getFeatureById);
 
 // update feature route
 router.put('/update/:featureId', updateFeature);
 
 // delete feature route
-router.delete('/delete:featureId', deleteFeature);
+router.delete('/delete/:featureId', deleteFeature);
 
 module.exports = router;

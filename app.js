@@ -1,6 +1,5 @@
 const express = require('express');
 const session = require('express-session');
-// const fileUpload = require('express-fileupload');
 const path = require('path');
 const userRoutes = require('./routes/userRoutes');
 const blogRoutes = require('./routes/blogRoutes');
