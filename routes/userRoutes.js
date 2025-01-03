@@ -1,26 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const { createUser, login, logout, updateUser, getUsers, getUserById, deleteUser } = require('../controllers/userController');
+const upload = require('../middleware/multer');
 
-// create new user route
-router.post('/create', createUser);
+// Create new user route
+router.post('/create', upload.single('profilePicture'), createUser);
 
-// login user route
+// Login user route
 router.post('/login', login);
 
-// logout user route
+// Logout user route
 router.post('/logout', logout);
 
-// get user route
+// Get all users route
 router.get('/getAll', getUsers);
 
-// get user by id route
+// Get user by ID route
 router.get('/get/:userId', getUserById);
 
-// update user route (profile and password)
-router.put('/update/:userId', updateUser);
+// Update user route (profile and password)
+router.put('/update/:userId', upload.single('profilePicture'), updateUser);
 
-// delete user route
+// Delete user route
 router.delete('/delete/:userId', deleteUser);
 
 module.exports = router;

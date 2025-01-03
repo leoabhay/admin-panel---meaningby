@@ -1,70 +1,83 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+const { error } = require('console');
 const jwt = require('jsonwebtoken');
+const path = require('path');
 
-// create user controller
+
+// Create user controller
 const createUser = async (req, res) => {
     try {
         const { name, email, password, confirmPassword } = req.body;
 
-        // validate user input
+        // Validate user input
         if (!(email && password && confirmPassword)) {
             console.error('Missing Fields:', { name, email, password, confirmPassword });
             return res.status(400).json({ message: "All input fields are required" });
         }
 
-        // check if user already exist
+        // Check if user already exists
         const userExist = await User.findOne({ email });
         if (userExist) {
-            return res.status(409).json({ message: "User already exist" });
+            return res.status(409).json({ message: "User already exists" });
         }
 
-        // compare password
+        // Compare password
         if (password !== confirmPassword) {
-            return res.status(400).json({ message: "Password do not match" });
+            return res.status(400).json({ message: "Passwords do not match" });
         }
 
-        // hash password
+        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // create new user
+        // Handle profile image upload
+        const profilePicture = req.file 
+            ? `/uploads/profiles/${req.file.filename}` 
+            : '/images/profile.jpg';
+
+        // Create new user
         const newUser = new User({
             name,
             email,
-            password: hashedPassword
+            password: hashedPassword,
+            profilePicture
         });
+
         await newUser.save();
 
-        // set session data after successful signup
+        // Set session data after successful signup
         req.session.isLoggedIn = true;
         req.session.userName = newUser.name;
+        req.session.userEmail = newUser.email;
+        req.session.userId = newUser._id;
+        req.session.userProfileImage = newUser.profilePicture;
 
-        // redirect to dashboard
+        // Redirect to dashboard
         res.redirect('/dashboard');
 
     } catch (error) {
-        console.log('Error creating user', error);
-        res.status(500).json({ message: "Error creating user", error: error });
+        console.error('Error creating user', error);
+        res.status(500).json({ message: "Error creating user", error });
     }
 };
 
-// login controller
+// Login controller
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // validate user input
+        // Validate user input
         if (!(email && password)) {
             return res.status(400).json({ message: "All input fields are required" });
         }
 
-        // check if user exist
+        // Check if user exists
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // check if password is correct
+        // Check if password is correct
         if (!await bcrypt.compare(password, user.password)) {
             return res.status(401).json({ message: "Incorrect password" });
         }
@@ -75,22 +88,67 @@ const login = async (req, res) => {
         // Set the token in a cookie
         res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 3600000 });
 
-        // set session data after successful login
+        // Set session data after successful login
         req.session.isLoggedIn = true;
         req.session.userName = user.name;
         req.session.userEmail = user.email;
         req.session.userId = user._id;
+        req.session.userProfileImage = user.profilePicture;
 
-        // redirect to dashboard
+        // Redirect to dashboard
         res.redirect('/dashboard');
 
     } catch (error) {
-        console.log('Error logging in', error);
-        res.status(500).json({ message: "Error logging in", error: error });
+        console.error('Error logging in', error);
+        res.status(500).json({ message: "Error logging in", error });
     }
 };
 
-// logout controller
+// Update user controller
+const updateUser = async (req, res) => {
+    try {
+        const { name, email, currentPassword, newPassword, confirmPassword } = req.body;
+        const userId = req.params.id || req.session.userId;
+
+        // Find user
+        const user = await User.findById(userId);
+        if (!user) {
+            console.error('User not found');
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Handle file upload if provided
+        if (req.file) {
+            user.profilePicture = `/uploads/profiles/${req.file.filename}`;
+            req.session.userProfileImage = user.profilePicture; // Update session data
+        }
+
+        // Update name and email
+        user.name = name || user.name;
+        user.email = email || user.email;
+
+        // Password update logic
+        if (newPassword && currentPassword) {
+            const isPasswordMatch = await bcrypt.compare(currentPassword, user.password);
+            if (!isPasswordMatch) {
+                return res.status(400).json({ message: "Current password is incorrect" });
+            }
+            if (newPassword !== confirmPassword) {
+                return res.status(400).json({ message: "New passwords do not match" });
+            }
+            user.password = await bcrypt.hash(newPassword, 10);
+        }
+
+        await user.save();
+        res.status(200).json({ message: "Profile updated successfully" });
+
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({ message: "Error updating profile", error });
+    }
+};
+
+// Logout controller
 const logout = (req, res) => {
     req.session.destroy((err) => {
         if (err) {
@@ -100,6 +158,7 @@ const logout = (req, res) => {
         res.redirect('/login');
     });
 };
+
 
 // get all users controller
 const getUsers = async (req, res) => {
@@ -126,28 +185,6 @@ const getUserById = async (req, res) => {
     }
 };
 
-// update user controller
-const updateUser = async (req, res) => {
-    try {
-        const { name, email, password } = req.body;
-        const user = await User.findById(req.params.id);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        user.name = name || user.name;
-        user.email = email || user.email;
-        if (password) {
-            user.password = await bcrypt.hash(password, 10);
-        }
-
-        await user.save();
-        res.status(200).json(user);
-    } catch (error) {
-        console.log('Error updating user', error);
-        res.status(500).json({ message: "Error updating user", error: error });
-    }
-};
 
 // delete user controller
 const deleteUser = async (req, res) => {

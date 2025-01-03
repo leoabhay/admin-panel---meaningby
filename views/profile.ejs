@@ -6,95 +6,164 @@
     <title>User Profile</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
             margin: 0;
             padding: 0;
+            color: #444;
         }
+
         header {
             color: black;
             padding: 0;
             text-align: center;
         }
+
         .container {
-            width: 80%;
-            margin: 0 auto;
+            max-width: 800px;
+            margin: 20px auto;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
             padding: 20px;
         }
+
         .profile-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 20px 0;
-            border-bottom: 1px solid #ccc;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
         }
+
         .profile-header img {
             border-radius: 50%;
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border: 2px solid #000;
         }
+
         .profile-header h1 {
+            font-size: 20px;
             margin: 0;
         }
+
+        .profile-header button {
+            padding: 10px 20px;
+            background-color: #f44336;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .profile-header button:hover {
+            background-color: #d32f2f;
+        }
+
         .profile-details {
-            padding: 20px 0;
+            margin: 20px 0;
         }
+
         .profile-details p {
-            margin: 5px 0;
+            margin: 10px 0;
+            font-size: 16px;
         }
+
         .update-form {
-            margin-top: 20px;
+            background: #f7f7f7;
+            padding: 20px;
+            border-radius: 10px;
         }
+
         .update-form label {
             display: block;
             margin: 10px 0 5px;
+            font-weight: bold;
+            color: #333;
         }
+
         .update-form input[type="text"],
         .update-form input[type="email"],
         .update-form input[type="file"],
         .update-form input[type="password"] {
             width: 100%;
             padding: 10px;
-            margin: 5px 0;
-            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
             border-radius: 5px;
+            font-size: 14px;
         }
+
         .update-form button {
-            padding: 10px 20px;
-            background-color: #333;
+            width: 100%;
+            padding: 12px;
+            background-color: #000;
             color: #fff;
             border: none;
             border-radius: 5px;
+            font-size: 16px;
             cursor: pointer;
         }
+
         .update-form button:hover {
-            background-color: #555;
+            background-color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-header img {
+                margin-bottom: 10px;
+            }
+        }
+
+        .navbar {
+            background-color: #000;
+            color: #fff;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar .brand img {
+            height: 40px;
         }
     </style>
 </head>
-
-<%- include('./navbar', { isLoggedIn: typeof isLoggedIn !== 'undefined' ? isLoggedIn : false }) %>
-
-<header>
-    <h1>User Profile Management</h1> <hr>
-</header>
-
 <body>
+    <div class="navbar">
+        <a href="/dashboard" class="brand">
+            <img src="/images/logo.png" alt="Logo" style="height: 40px;">
+        </a>
+    </div>
+
+    <header>
+        <h1>User Profile Management</h1> <hr>
+    </header>
+
     <div class="container">
         <div class="profile-header">
             <div>
                 <h1><%= userName %>'s Profile</h1>
-                <img src="<%= userProfileImage ? userProfileImage : '/profile.jpg' %>" alt="Profile Picture">
+                <img src="<%= userProfileImage %>" alt="Profile Picture">
             </div>
             <button onclick="logout()">Logout</button>
         </div>
+
         <div class="profile-details">
             <p><strong>Name:</strong> <%= userName %></p>
             <p><strong>Email:</strong> <%= userEmail %></p>
         </div>
+
         <div class="update-form">
-            <form action="/api/user/update/<%= userId %>" method="POST" enctype="multipart/form-data">
+            <form method="POST" enctype="multipart/form-data">
                 <label for="name">Name</label>
                 <input type="text" id="name" name="name" value="<%= userName %>">
 
@@ -105,22 +174,49 @@
                 <input type="file" id="profilePicture" name="profilePicture">
 
                 <label for="currentPassword">Current Password</label>
-                <input type="password" id="currentPassword" name="currentPassword">
+                <input type="password" id="currentPassword" name="currentPassword" placeholder="Enter current password">
 
                 <label for="newPassword">New Password</label>
-                <input type="password" id="newPassword" name="newPassword">
+                <input type="password" id="newPassword" name="newPassword" placeholder="Enter new password">
 
                 <label for="confirmPassword">Confirm New Password</label>
-                <input type="password" id="confirmPassword" name="confirmPassword">
+                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm new password">
 
                 <button type="submit">Update Profile</button>
             </form>
         </div>
     </div>
 
-<%- include('./footer') %>
+    <%- include('./footer') %>
 
     <script>
+        const form = document.querySelector('.update-form form');
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+
+            const userId = '<%= userId %>';
+
+            try {
+                const response = await fetch(`/api/user/update/${userId}`, {
+                    method: 'PUT',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    alert('Profile updated successfully!');
+                    window.location.reload();
+                } else {
+                    const errorData = await response.json();
+                    alert('Error updating profile: ' + (errorData.message || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Request failed:', error);
+                alert('An error occurred while updating the profile.');
+            }
+        });
+
         function logout() {
             window.location.href = '/logout';
         }

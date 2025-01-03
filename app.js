@@ -1,27 +1,31 @@
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
+const multer = require('./middleware/multer');
 const userRoutes = require('./routes/userRoutes');
 const blogRoutes = require('./routes/blogRoutes');
 const featureRoutes = require('./routes/featureRoutes');
 const wordRoutes = require('./routes/wordRoutes');
 const dbConnect = require('./config/db');
 const { createUser, login } = require('./controllers/userController');
-const multer = require('multer');
+
+// load environment variables
 require('dotenv').config();
+
+// create express app
 const app = express();
 
 // database connection
 dbConnect();
 
-// set up view engine
+// set up view engine and middleware
 app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // for form data parsing
 app.use(express.static('public'));
 
 // serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads/profiles', express.static(path.join(__dirname, 'uploads', 'profiles')));
 
 // set up session middleware
 app.use(session({
@@ -33,8 +37,13 @@ app.use(session({
 
 // route to serve the profile page
 app.get('/profile', (req, res) => {
+    // console.log('Session Data:', req.session);
+    // console.log('User Profile Image:', req.session.userProfileImage);
+
     const isLoggedIn = req.session.isLoggedIn || false;
-    const userProfileImage = isLoggedIn ? req.session.userProfileImage : '/default-image.jpg';
+    const userProfileImage = isLoggedIn && req.session.userProfileImage 
+        ? req.session.userProfileImage 
+        : '/images/profile.jpg';
     const userName = isLoggedIn ? req.session.userName : 'Guest';
     const userEmail = isLoggedIn ? req.session.userEmail : 'email@example.com';
     const userId = isLoggedIn ? req.session.userId : null;
@@ -44,17 +53,32 @@ app.get('/profile', (req, res) => {
     }
 
     res.render('profile', {
-        userName: userName,
-        userProfileImage: userProfileImage,
-        userEmail: userEmail,
-        userId: userId
+        userName,
+        userProfileImage,
+        userEmail,
+        userId,
     });
+});
+
+// route to handle profile picture update
+app.post('/profile/upload', multer.single('profilePicture'), (req, res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+
+    if (!isLoggedIn) {
+        return res.redirect('/login');
+    }
+
+    // Store the uploaded profile image path in session
+    req.session.userProfileImage = `/uploads/profiles/${req.file.filename}`;
+
+    // Send a response indicating successful upload
+    res.redirect('/dashboard'); // or send a response with updated data
 });
 
 // route to serve the dashboard page
 app.get('/dashboard', (req, res) => {
     const isLoggedIn = req.session.isLoggedIn || false;
-    const userProfileImage = isLoggedIn ? req.session.userProfileImage : '/profile.jpg';
+    const userProfileImage = isLoggedIn ? req.session.userProfileImage : '/uploads/profiles/default.jpg';
     const userName = isLoggedIn ? req.session.userName : 'Guest';
 
     if (!isLoggedIn) {
@@ -128,20 +152,16 @@ app.use('/api/blog', blogRoutes);
 app.use('/api/feature', featureRoutes);
 app.use('/api/word', wordRoutes);
 
-// global multer error handler
-app.use((err, req, res, next) => {
-    if (err instanceof multer.MulterError) {
-
-        // handle multer-specific errors
-        res.status(400).json({ message: err.message });
-    } else if (err) {
-        
-        // handle any other errors
-        res.status(500).json({ message: "Internal Server Error", error: err.message });
-    } else {
-        next();
-    }
-});
+// error handler for multer
+// app.use((err, req, res, next) => {
+//     if (err instanceof multer.MulterError) {
+//         res.status(400).json({ message: err.message });
+//     } else if (err) {
+//         res.status(500).json({ message: "Internal Server Error", error: err.message });
+//     } else {
+//         next();
+//     }
+// });
 
 // connect to server
 const PORT = process.env.PORT || 8080;
