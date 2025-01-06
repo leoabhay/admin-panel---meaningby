@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/styles/dashboard.css">
+</head>
+<body>
+
+    <!-- include navbar here -->
+<%- include('./navbar') %>
+
+<div class="content-wrapper">
+    <div class="sidebar">
+        <div class="profile">
+            <!-- User profile section -->
+            <img src="<%= userProfileImage %>" alt="Profile Picture">
+            <h2><%= userName %></h2>
+            <!-- <% if (!isLoggedIn) { %>
+                <!- Show "Sign In" link if not logged in -->
+                <!-- <a href="/login">Sign In</a> -->
+            <!-- <% } else { %> -->
+                <!-- Show "Profile" link if logged in -->
+                <a href="/profile">Profile</a>
+            <!-- <% } %> -->
+        </div>
+
+        <!-- Sidebar Menu -->
+        <ul>
+            <li><a href="#" class="active">Dashboard</a></li>
+            <li><a href="/word">Word</a></li>
+            <li><a href="/blog">Blog</a></li>
+            <li><a href="/feature">Feature</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <h1>Welcome to Meaning By</h1>
+        <!-- <% if (isLoggedIn) { %> -->
+            <p>Your personalized dashboard is ready to use!</p>
+        <!-- <% } else { %>
+            <p>Please log in to access your dashboard.</p>
+        <% } %> -->
+    </div>
+</div>
+
+<!-- include footer here -->
+<%- include('footer') %>
+
+</body>
+</html>

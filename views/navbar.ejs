@@ -1,0 +1,38 @@
+<!-- navbar.ejs -->
+<div class="navbar">
+    <a href="/dashboard" class="brand">
+        <img src="/images/logo.png" alt="Logo" style="height: 40px;">
+    </a>
+    <% if (isLoggedIn) { %>
+        <button class="logout-button" onclick="logout()">Logout</button>
+    <% } %>
+</div>
+
+<script>
+    function logout() {
+        window.location.href = '/logout';
+    }
+</script>
+<style>
+    .navbar {
+        background-color: #000;
+        color: #fff;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .navbar .brand img {
+        height: 40px;
+    }
+    .navbar .logout-button {
+        background-color: #ff4d4d;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+    }
+    .navbar .logout-button:hover {
+        background-color: #ff1a1a;
+    }
+</style>

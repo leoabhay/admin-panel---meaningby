@@ -1,0 +1,133 @@
+/* for profile */
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+    color: #444;
+}
+
+header {
+    color: black;
+    padding: 0;
+    text-align: center;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    background: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    padding: 20px;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.profile-header img {
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 2px solid #000;
+}
+
+.profile-header h1 {
+    font-size: 20px;
+    margin: 0;
+}
+
+.profile-header button {
+    padding: 10px 20px;
+    background-color: #f44336;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.profile-header button:hover {
+    background-color: #d32f2f;
+}
+
+.profile-details {
+    margin: 20px 0;
+}
+
+.profile-details p {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.update-form {
+    background: #f7f7f7;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.update-form label {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+.update-form input[type="text"],
+.update-form input[type="email"],
+.update-form input[type="file"],
+.update-form input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.update-form button {
+    width: 100%;
+    padding: 12px;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.update-form button:hover {
+    background-color: #333;
+}
+
+@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .profile-header img {
+        margin-bottom: 10px;
+    }
+}
+
+.navbar {
+    background-color: #000;
+    color: #fff;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar .brand img {
+    height: 40px;
+}

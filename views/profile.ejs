@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="/styles/profile.css">
+</head>
+<body>
+    <div class="navbar">
+        <a href="/dashboard" class="brand">
+            <img src="/images/logo.png" alt="Logo" style="height: 40px;">
+        </a>
+    </div>
+
+    <header>
+        <h1>User Profile Management</h1> <hr>
+    </header>
+
+    <div class="container">
+        <div class="profile-header">
+            <div>
+                <h1><%= userName %>'s Profile</h1>
+                <img src="<%= userProfileImage %>" alt="Profile Picture">
+            </div>
+            <button onclick="logout()">Logout</button>
+        </div>
+
+        <div class="profile-details">
+            <p><strong>Name:</strong> <%= userName %></p>
+            <p><strong>Email:</strong> <%= userEmail %></p>
+        </div>
+
+        <div class="update-form">
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="userId" value="<%= userId %>">
+
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" value="<%= userName %>">
+
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="<%= userEmail %>">
+
+                <label for="profilePicture">Profile Picture</label>
+                <input type="file" id="profilePicture" name="profilePicture">
+
+                <label for="currentPassword">Current Password</label>
+                <input type="password" id="currentPassword" name="currentPassword" placeholder="Enter current password">
+
+                <label for="newPassword">New Password</label>
+                <input type="password" id="newPassword" name="newPassword" placeholder="Enter new password">
+
+                <label for="confirmPassword">Confirm New Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm new password">
+
+                <button type="submit">Update Profile</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- include footer here -->
+    <%- include('./footer') %>
+
+    <script src="/scripts/profile.js"></script>
+</body>
+</html>

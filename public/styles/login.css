@@ -1,0 +1,112 @@
+/* for login and signup */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+    color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    display: flex;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 800px;
+    width: 90%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.image-container {
+    flex: 1;
+    background-image: url('/images/login.png'); /* path to the uploaded image */
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: auto;
+    min-height: 300px; /* ensures visibility for smaller screens */
+}
+
+.form-container {
+    flex: 1;
+    padding: 20px;
+    text-align: center;
+}
+
+.form-container h1 {
+    margin-bottom: 20px;
+    color: #000;
+}
+
+.form-container input {
+    width: 100%;
+    max-width: 350px;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #000;
+    box-sizing: border-box;
+}
+
+.form-container button {
+    width: 100%;
+    max-width: 350px;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #333;
+    color: #fff;
+    cursor: pointer;
+}
+
+.form-container button:hover {
+    background-color: #444;
+}
+
+.form-container a {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+.form-container a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .image-container {
+        width: 100%;
+        min-height: 200px; /* ensures the image container has a minimum height */
+    }
+
+    .form-container {
+        padding: 20px;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-container input, .form-container button {
+        max-width: 100%;
+    }
+
+    .form-container h1 {
+        font-size: 1.5rem;
+    }
+
+    .form-container p {
+        font-size: 0.9rem;
+    }
+}
