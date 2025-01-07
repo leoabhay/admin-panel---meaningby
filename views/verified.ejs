@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verification Success</title>
-    <link rel="stylesheet" href="/styles/login.css">
+    <link rel="stylesheet" href="/styles/otp.css">
     <script>
         // redirect to the specified URL after a delay
         setTimeout(() => {
@@ -17,6 +17,9 @@
         <div class="form-container">
             <h1><%= message %></h1>
             <p>You will be redirected shortly...</p>
+
+            <!-- link for manual redirection -->
+            <p>If you are not redirected, <a href="<%= redirectUrl %>">click here</a>.</p>
         </div>
     </div>
 </body>
