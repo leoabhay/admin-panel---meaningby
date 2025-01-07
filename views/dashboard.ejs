@@ -31,19 +31,53 @@
         <ul>
             <li><a href="#" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
             <li><a href="/word"> <i class="fas fa-file-word"></i> Word</a></li>
-            <li><a href="/blog"> <i class="fas fa-blog"></i> Blog</a></li>
+            <li><a href="/blog"> <i class="fas fa-pen-fancy"></i> Blog</a></li>
             <li><a href="/feature"> <i class="fa-solid fa-font-awesome"></i> Feature</a></li>
         </ul>
     </div>
 
-    <div class="main-content">
-        <h1>Welcome to Meaning By</h1>
+    <!-- <div class="main-content">
+        <h1>Welcome to Meaning By</h1> -->
         <!-- <% if (isLoggedIn) { %> -->
-            <p>Your personalized dashboard is ready to use!</p>
+            <!-- <p>Your personalized dashboard is ready to use!</p> -->
         <!-- <% } else { %>
             <p>Please log in to access your dashboard.</p>
         <% } %> -->
+    <!-- </div> -->
+
+    <div class="main-content">
+        <h1>Welcome to Meaning By</h1>
+        <% if (isLoggedIn) { %>
+            <p>Your personalized dashboard is ready to use!</p>
+            <div class="stats">
+                <div class="stat">
+                    <i class="fas fa-users fa-2x" style="color: #007bff;"></i>
+                    <h2><%= userCount %></h2>
+                    <p>Total Users</p>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-file-word fa-2x" style="color: #28a745;"></i>
+                    <h2><%= wordCount %></h2>
+                    <p>Total Words</p>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-pen-fancy fa-2x" style="color: #ffc107;"></i>
+                    <h2><%= blogCount %></h2>
+                    <p>Total Blogs</p>
+                </div>
+                <div class="stat">
+                    <i class="fa-solid fa-font-awesome fa-2x" style="color: #dc3545;"></i>
+                    <h2><%= featureCount %></h2>
+                    <p>Total Features</p>
+                </div>
+            </div>
+        <% } else { %>
+            <p>Please log in to access your dashboard.</p>
+        <% } %>
     </div>
+    
+    
+    
 </div>
 
 <!-- include footer here -->

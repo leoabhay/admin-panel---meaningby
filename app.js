@@ -87,20 +87,36 @@ app.post('/profile/upload', multer.upload.uploadProfiles.single('profilePicture'
 });
 
 // route to serve the dashboard page
-app.get('/dashboard', (req, res) => {
-    const isLoggedIn = req.session.isLoggedIn || false;
-    const userProfileImage = isLoggedIn ? req.session.userProfileImage : '/uploads/profiles/default.jpg';
-    const userName = isLoggedIn ? req.session.userName : 'Guest';
+// import models for count
+const User = require('./models/User');
+const Word = require('./models/Word');
+const Blog = require('./models/Blog');
+const Feature = require('./models/Feature');
 
-    if (!isLoggedIn) {
+app.get('/dashboard', async (req, res) => {
+    if (!req.session.isLoggedIn) {
         return res.redirect('/login');
     }
 
-    res.render('dashboard', {
-        isLoggedIn: isLoggedIn,
-        userProfileImage: userProfileImage,
-        userName: userName
-    });
+    try {
+        const userCount = await User.countDocuments();
+        const wordCount = await Word.countDocuments();
+        const blogCount = await Blog.countDocuments();
+        const featureCount = await Feature.countDocuments();
+
+        res.render('dashboard', {
+            isLoggedIn: req.session.isLoggedIn,
+            userProfileImage: req.session.userProfileImage || '/uploads/profiles/default.jpg',
+            userName: req.session.userName || 'Guest',
+            userCount,
+            wordCount,
+            blogCount,
+            featureCount,
+        });
+    } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        res.status(500).send('Server Error');
+    }
 });
 
 // route to handle login ( localhost:8080/ or localhost:8080/login ) 
