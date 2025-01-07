@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createUser, login, logout, updateUser, getUsers, getUserById, deleteUser } = require('../controllers/userController');
+const { createUser, login, logout, updateUser, getUsers, getUserById, deleteUser, verifyOTP, resendOTP } = require('../controllers/userController');
 const { upload } = require('../middleware/multer');
 
 // Create new user route
@@ -23,5 +23,22 @@ router.put('/update/:userId', upload.uploadProfiles.single('profilePicture'), up
 
 // Delete user route
 router.delete('/delete/:userId', deleteUser);
+
+// verify otp
+router.post('/verify', verifyOTP);
+
+// resend otp
+router.post('/resend', resendOTP);
+
+// get otp
+// router.get('/otp', (req, res) => {
+//     const { userId, email } = req.query;
+
+//     if (!userId || !email) {
+//         return res.status(400).send('Missing userId or email parameters');
+//     }
+
+//     res.render('otp', { userId, email }); // Render the OTP page with userId and email
+// });
 
 module.exports = router;

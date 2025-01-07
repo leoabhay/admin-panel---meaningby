@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Success</title>
+    <link rel="stylesheet" href="/styles/login.css">
+    <script>
+        // redirect to the specified URL after a delay
+        setTimeout(() => {
+            window.location.href = "<%= redirectUrl %>";
+        }, 2000); // 2 seconds delay
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1><%= message %></h1>
+            <p>You will be redirected shortly...</p>
+        </div>
+    </div>
+</body>
+</html>

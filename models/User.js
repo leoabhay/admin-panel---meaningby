@@ -5,7 +5,8 @@ const userSchema = new mongoose.Schema({
     email: { type: String, unique: true },
     password: { type: String },
     confirmPassword: { type: String },
-    profilePicture: { type: String, default: '/images/profile.jpg' }
+    profilePicture: { type: String, default: '/images/profile.jpg' },
+    verified : { type: Boolean, default: false }
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP</title>
+    <link rel="stylesheet" href="/styles/login.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>Email Verification</h1>
+            <p>Please enter the OTP sent to your email.</p>
+            <form action="/api/user/verify" method="POST">
+                <input type="hidden" name="userId" value="<%= userId %>">
+                <input type="text" name="otp" placeholder="Enter OTP" required pattern="\d{4}" title="Enter a 4-digit OTP">
+                <button type="submit">Verify</button>
+            </form>
+            <!-- <form action="/api/user/resend" method="POST">
+                <input type="hidden" name="userId" value="<%= userId %>">
+                <input type="hidden" name="email" value="<%= email %>">
+                <button type="submit">Resend OTP</button>
+            </form> -->
+        </div>
+    </div>
+</body>
+</html>
