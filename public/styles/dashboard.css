@@ -1,4 +1,6 @@
-/* General Styles */
+/* for dashboard */
+
+/* general styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -11,14 +13,14 @@ body {
     overflow: hidden;
 }
 
-/* Content Wrapper */
+/* content wrapper */
 .content-wrapper {
     display: flex;
     flex: 1;
     overflow: hidden;
 }
 
-/* Sidebar */
+/* sidebar */
 .sidebar {
     width: 250px;
     background-color: #fff;
@@ -96,7 +98,7 @@ body {
     color: #fff;
 }
 
-/* Main Content */
+/* main content */
 .main-content {
     flex-grow: 1;
     padding: 20px;
@@ -116,7 +118,7 @@ body {
     color: #666;
 }
 
-/* Stats Section */
+/* Sstats section */
 .stats {
     display: flex;
     gap: 20px;
@@ -150,22 +152,16 @@ body {
     color: #666;
 }
 
-/* Footer */
-.footer {
-    width: 100%;
-    background-color: #000;
-    color: white;
-    padding: 10px 20px;
-    text-align: center;
-    flex-shrink: 0;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+/* hidden-stats ( for total users ) */
+.hidden-stats {
+    display: none;
+    margin-top: 10px;
 }
 
-.footer i {
-    color: #fff;
-    font-size: 1.2em;
+.stat:not(.active) {
+    transition: none;
+}
+
+.stat.active .hidden-stats {
+    display: block;
 }

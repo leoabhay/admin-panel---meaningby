@@ -100,6 +100,8 @@ app.get('/dashboard', async (req, res) => {
 
     try {
         const userCount = await User.countDocuments();
+        const verifiedUserCount = await User.countDocuments({ verified: true });
+        const unverifiedUserCount = await User.countDocuments({ verified: false });
         const wordCount = await Word.countDocuments();
         const blogCount = await Blog.countDocuments();
         const featureCount = await Feature.countDocuments();
@@ -109,6 +111,8 @@ app.get('/dashboard', async (req, res) => {
             userProfileImage: req.session.userProfileImage || '/uploads/profiles/default.jpg',
             userName: req.session.userName || 'Guest',
             userCount,
+            verifiedUserCount,
+            unverifiedUserCount,
             wordCount,
             blogCount,
             featureCount,
